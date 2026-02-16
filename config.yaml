@@ -1,0 +1,56 @@
+sites:
+  bestreviews.co.uk:
+    affiliate_tag: bestrevs-21
+    categories:
+      water-softeners:
+        keywords:
+          - "water softener UK"
+          - "best water softener"
+          - "harvey water softener"
+          - "water2buy review"
+          - "BWT water softener"
+        subreddits:
+          - "r/UKPersonalFinance"
+          - "r/DIYUK"
+          - "r/plumbing"
+          - "r/AskUK"
+        forums:
+          - url: "https://forums.moneysavingexpert.com/search?q=water+softener"
+            name: "MoneySavingExpert"
+          - url: "https://www.avforums.com/search/?q=water+softener"
+            name: "AVForums"
+          - url: "https://www.diynot.com/diy/search/?q=water+softener"
+            name: "DIYnot"
+          - url: "https://www.pistonheads.com/gassing/search.asp?s=water+softener"
+            name: "PistonHeads"
+        youtube_queries:
+          - "water softener UK review"
+          - "best water softener 2025 2026"
+          - "water2buy review"
+          - "harvey water softener worth it"
+        trustpilot_companies:
+          - "water2buy"
+          - "harvey-water-softeners"
+        amazon_queries:
+          - "water softener UK"
+          - "Water2Buy W2B200"
+
+# Scraper settings
+settings:
+  reddit:
+    max_threads_per_subreddit: 50
+    max_comments_per_thread: 100
+    min_score: 2
+    sort: "relevance"
+    time_filter: "all"
+  youtube:
+    max_results: 20
+    max_comments: 100
+  forums:
+    max_pages: 5
+    headless: true
+    timeout: 30000
+  trustpilot:
+    max_reviews: 50
+  amazon:
+    max_results: 20

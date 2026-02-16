@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UGC Pipeline Dashboard</title>
+<style>
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --border: #30363d;
+  --text: #e6edf3;
+  --text-muted: #8b949e;
+  --accent: #58a6ff;
+  --green: #3fb950;
+  --orange: #d29922;
+  --red: #f85149;
+  --purple: #bc8cff;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+h1 { font-size: 24px; margin-bottom: 4px; }
+.subtitle { color: var(--text-muted); font-size: 14px; margin-bottom: 24px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+}
+.card h2 { font-size: 14px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.card .value { font-size: 32px; font-weight: 700; }
+.card .detail { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.badge-green { background: rgba(63, 185, 80, 0.15); color: var(--green); }
+.badge-orange { background: rgba(210, 153, 34, 0.15); color: var(--orange); }
+.badge-red { background: rgba(248, 81, 73, 0.15); color: var(--red); }
+.badge-purple { background: rgba(188, 140, 255, 0.15); color: var(--purple); }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+tr:hover { background: rgba(255, 255, 255, 0.03); }
+
+.sentiment-bar {
+  display: inline-block;
+  width: 60px;
+  height: 8px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+.sentiment-fill {
+  height: 100%;
+  border-radius: 4px;
+}
+
+.section { margin-bottom: 32px; }
+.section h2 {
+  font-size: 18px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.quote {
+  font-style: italic;
+  color: var(--text-muted);
+  font-size: 13px;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actions { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  color: var(--text);
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn-primary { background: #238636; border-color: #238636; color: #fff; }
+.btn-primary:hover { background: #2ea043; border-color: #2ea043; color: #fff; }
+
+.run-history { max-height: 300px; overflow-y: auto; }
+.run-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.run-item:last-child { border-bottom: none; }
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+.empty-state h2 { font-size: 20px; color: var(--text); margin-bottom: 8px; text-transform: none; }
+
+.loading { text-align: center; padding: 40px; color: var(--text-muted); }
+
+.category-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0;
+}
+.tab {
+  padding: 8px 16px;
+  font-size: 14px;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+@media (max-width: 600px) {
+  body { padding: 12px; }
+  .grid { grid-template-columns: 1fr; }
+  .card .value { font-size: 24px; }
+  table { font-size: 13px; }
+  th, td { padding: 8px 6px; }
+}
+</style>
+</head>
+<body>
+
+<h1>UGC Pipeline Dashboard</h1>
+<p class="subtitle">bestreviews.co.uk — Automated user-generated content aggregation</p>
+
+<div class="actions">
+  <a class="btn btn-primary" id="run-btn" href="#" target="_blank">Run Pipeline Now</a>
+  <a class="btn" id="repo-btn" href="#" target="_blank">View Repo</a>
+  <a class="btn" id="actions-btn" href="#" target="_blank">Action Runs</a>
+</div>
+
+<div id="dashboard-content">
+  <div class="loading">Loading dashboard data...</div>
+</div>
+
+<script>
+const SITE = 'bestreviews.co.uk';
+// These get filled after repo is created
+const REPO_OWNER = 'sunnyp81';
+const REPO_NAME = 'ugc-pipeline';
+
+// Set action links
+document.getElementById('run-btn').href = `https://github.com/${REPO_OWNER}/${REPO_NAME}/actions/workflows/scrape.yml`;
+document.getElementById('repo-btn').href = `https://github.com/${REPO_OWNER}/${REPO_NAME}`;
+document.getElementById('actions-btn').href = `https://github.com/${REPO_OWNER}/${REPO_NAME}/actions`;
+
+async function loadJSON(path) {
+  try {
+    const resp = await fetch(path);
+    if (!resp.ok) return null;
+    return await resp.json();
+  } catch { return null; }
+}
+
+function timeAgo(dateStr) {
+  const now = new Date();
+  const date = new Date(dateStr);
+  const diff = Math.floor((now - date) / 1000);
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
+}
+
+function sentimentColor(score) {
+  if (score >= 0.5) return 'var(--green)';
+  if (score >= 0.2) return '#3fb950aa';
+  if (score >= -0.2) return 'var(--orange)';
+  return 'var(--red)';
+}
+
+function verdictBadge(verdict) {
+  const classes = {
+    'RECOMMENDED': 'badge-green',
+    'GOOD': 'badge-green',
+    'MIXED': 'badge-orange',
+    'CAUTION': 'badge-orange',
+    'AVOID': 'badge-red',
+    'PENDING': 'badge-purple',
+  };
+  return `<span class="badge ${classes[verdict] || 'badge-purple'}">${verdict}</span>`;
+}
+
+function renderDashboard(status, summaries) {
+  const container = document.getElementById('dashboard-content');
+
+  if (!status) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <h2>No data yet</h2>
+        <p>Run the pipeline to start collecting UGC data.</p>
+        <p style="margin-top:12px">Click "Run Pipeline Now" above or run locally:</p>
+        <code style="color:var(--accent)">python run.py --category water-softeners</code>
+      </div>`;
+    return;
+  }
+
+  const lastRun = status.last_run;
+  const latestRun = status.runs[status.runs.length - 1];
+  const categories = Object.keys(latestRun?.categories || {});
+
+  let html = '';
+
+  // Summary cards
+  const totalSources = Object.values(latestRun?.categories || {}).reduce((sum, c) => {
+    return sum + Object.values(c.sources || {}).reduce((s, v) => s + v, 0);
+  }, 0);
+  const totalProducts = Object.values(latestRun?.categories || {}).reduce((sum, c) => sum + (c.products_found || 0), 0);
+  const hasErrors = Object.values(latestRun?.categories || {}).some(c => c.error);
+
+  html += `<div class="grid">
+    <div class="card">
+      <h2>Last Run</h2>
+      <div class="value">${timeAgo(lastRun)}</div>
+      <div class="detail">${new Date(lastRun).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
+    </div>
+    <div class="card">
+      <h2>Items Scraped</h2>
+      <div class="value">${totalSources}</div>
+      <div class="detail">Across ${categories.length} ${categories.length === 1 ? 'category' : 'categories'}</div>
+    </div>
+    <div class="card">
+      <h2>Products Found</h2>
+      <div class="value">${totalProducts}</div>
+      <div class="detail">${hasErrors ? '<span class="badge badge-orange">Some errors</span>' : '<span class="badge badge-green">All OK</span>'}</div>
+    </div>
+    <div class="card">
+      <h2>Total Runs</h2>
+      <div class="value">${status.runs.length}</div>
+      <div class="detail">History kept for last 30</div>
+    </div>
+  </div>`;
+
+  // Source breakdown for latest run
+  if (latestRun) {
+    html += `<div class="section"><h2>Latest Scrape — Source Breakdown</h2>`;
+    for (const [cat, info] of Object.entries(latestRun.categories)) {
+      html += `<div class="card" style="margin-bottom:12px">
+        <h2 style="text-transform:none;font-size:16px;color:var(--text)">${cat}</h2>
+        <table><thead><tr><th>Source</th><th>Items</th><th>Status</th></tr></thead><tbody>`;
+      for (const [src, count] of Object.entries(info.sources || {})) {
+        const statusBadge = count > 0
+          ? `<span class="badge badge-green">${count} items</span>`
+          : `<span class="badge badge-red">0</span>`;
+        html += `<tr><td>${src}</td><td>${count}</td><td>${statusBadge}</td></tr>`;
+      }
+      if (info.error) {
+        html += `<tr><td colspan="3" style="color:var(--red)">Error: ${info.error}</td></tr>`;
+      }
+      html += `</tbody></table></div>`;
+    }
+    html += `</div>`;
+  }
+
+  // Product rankings per category
+  for (const [cat, summary] of Object.entries(summaries)) {
+    if (!summary) continue;
+
+    html += `<div class="section">
+      <h2>Products — ${cat} <span style="font-size:13px;color:var(--text-muted);font-weight:400">${summary.total_mentions} total mentions</span></h2>`;
+
+    if (summary.products && summary.products.length) {
+      html += `<div class="card"><table>
+        <thead><tr><th>#</th><th>Product</th><th>Mentions</th><th>Sentiment</th><th>Verdict</th><th>Top Quote</th></tr></thead>
+        <tbody>`;
+      summary.products.forEach((p, i) => {
+        const pct = Math.round(((p.sentiment_score + 1) / 2) * 100);
+        html += `<tr>
+          <td>${i + 1}</td>
+          <td><strong>${p.name}</strong></td>
+          <td>${p.mentions}</td>
+          <td>
+            <div class="sentiment-bar"><div class="sentiment-fill" style="width:${pct}%;background:${sentimentColor(p.sentiment_score)}"></div></div>
+            ${p.sentiment_score.toFixed(2)}
+          </td>
+          <td>${verdictBadge(p.verdict)}</td>
+          <td><div class="quote">"${p.top_quote || '—'}"</div></td>
+        </tr>`;
+      });
+      html += `</tbody></table></div>`;
+    }
+
+    if (summary.avoid_products && summary.avoid_products.length) {
+      html += `<div class="card" style="margin-top:12px;border-color:var(--red)">
+        <h2 style="color:var(--red)">AVOID List</h2>
+        <table><thead><tr><th>Product</th><th>Mentions</th><th>Complaints</th><th>Reason</th></tr></thead><tbody>`;
+      summary.avoid_products.forEach(p => {
+        html += `<tr>
+          <td><strong>${p.name}</strong></td>
+          <td>${p.mentions}</td>
+          <td>${p.complaint_count}</td>
+          <td>${p.reason || '—'}</td>
+        </tr>`;
+      });
+      html += `</tbody></table></div>`;
+    }
+
+    html += `</div>`;
+  }
+
+  // Run history
+  html += `<div class="section"><h2>Run History</h2>
+    <div class="card"><div class="run-history">`;
+  for (let i = status.runs.length - 1; i >= 0; i--) {
+    const run = status.runs[i];
+    const cats = Object.keys(run.categories || {}).join(', ');
+    const total = Object.values(run.categories || {}).reduce((sum, c) =>
+      sum + Object.values(c.sources || {}).reduce((s, v) => s + v, 0), 0);
+    const hasErr = Object.values(run.categories || {}).some(c => c.error);
+    html += `<div class="run-item">
+      <span>${new Date(run.timestamp).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })} — ${cats}</span>
+      <span>${total} items ${hasErr ? '<span class="badge badge-red">error</span>' : '<span class="badge badge-green">ok</span>'}</span>
+    </div>`;
+  }
+  html += `</div></div></div>`;
+
+  container.innerHTML = html;
+}
+
+async function init() {
+  const status = await loadJSON(`data/${SITE}-status.json`);
+
+  // Load category summaries
+  const summaries = {};
+  if (status?.runs?.length) {
+    const latestRun = status.runs[status.runs.length - 1];
+    for (const cat of Object.keys(latestRun.categories || {})) {
+      summaries[cat] = await loadJSON(`data/${SITE}-${cat}-summary.json`);
+    }
+  }
+
+  renderDashboard(status, summaries);
+}
+
+init();
+</script>
+</body>
+</html>

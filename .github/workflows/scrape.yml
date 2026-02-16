@@ -1,0 +1,98 @@
+name: UGC Scrape Pipeline
+
+on:
+  # Weekly schedule — every Sunday at 2am UTC
+  schedule:
+    - cron: '0 2 * * 0'
+
+  # Manual trigger with options
+  workflow_dispatch:
+    inputs:
+      site:
+        description: 'Site to scrape'
+        required: true
+        default: 'bestreviews.co.uk'
+        type: string
+      category:
+        description: 'Category (leave empty for all)'
+        required: false
+        type: string
+      source:
+        description: 'Source (leave empty for all)'
+        required: false
+        type: choice
+        options:
+          - ''
+          - reddit
+          - youtube
+          - forums
+          - trustpilot
+      process_only:
+        description: 'Process only (skip scraping)'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          playwright install chromium --with-deps
+
+      - name: Run pipeline
+        env:
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          REDDIT_USER_AGENT: 'ugc-pipeline/1.0 (GitHub Actions)'
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: |
+          SITE="${{ github.event.inputs.site || 'bestreviews.co.uk' }}"
+          CATEGORY="${{ github.event.inputs.category }}"
+          SOURCE="${{ github.event.inputs.source }}"
+          PROCESS_ONLY="${{ github.event.inputs.process_only }}"
+
+          CMD="python run.py --site $SITE"
+
+          if [ -n "$CATEGORY" ]; then
+            CMD="$CMD --category $CATEGORY"
+          else
+            CMD="$CMD --all-categories"
+          fi
+
+          if [ -n "$SOURCE" ]; then
+            CMD="$CMD --source $SOURCE"
+          fi
+
+          if [ "$PROCESS_ONLY" = "true" ]; then
+            CMD="$CMD --process-only"
+          fi
+
+          echo "Running: $CMD"
+          $CMD
+
+      - name: Commit results
+        run: |
+          git config user.name "UGC Pipeline Bot"
+          git config user.email "ugc-pipeline[bot]@users.noreply.github.com"
+          git add data/ docs/data/ last-run.md
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M UTC")
+            git commit -m "scrape: $TIMESTAMP"
+            git push
+          fi
