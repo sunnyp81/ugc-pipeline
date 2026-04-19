@@ -1,0 +1,22 @@
+{
+  "site": "bestreviews.co.uk",
+  "runs": [
+    {
+      "timestamp": "2026-04-19T04:49:40Z",
+      "categories": {
+        "water-softeners": {
+          "sources": {
+            "reddit": 0,
+            "youtube": 0,
+            "forums": 0,
+            "trustpilot": 2,
+            "amazon": 0
+          },
+          "products_found": 0,
+          "error": null
+        }
+      }
+    }
+  ],
+  "last_run": "2026-04-19T04:49:40Z"
+}
