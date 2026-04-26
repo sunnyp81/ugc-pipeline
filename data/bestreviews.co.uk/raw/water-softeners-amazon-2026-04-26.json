@@ -1,0 +1,10 @@
+{
+  "source": "amazon",
+  "scraped_at": "2026-04-26T04:57:16.554936+00:00",
+  "queries": [
+    "water softener UK",
+    "Water2Buy W2B200"
+  ],
+  "results": [],
+  "note": "Amazon scraper uses search-based fallback. Direct scraping blocked by Amazon."
+}

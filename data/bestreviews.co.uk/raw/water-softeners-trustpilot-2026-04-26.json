@@ -1,0 +1,36 @@
+{
+  "source": "trustpilot",
+  "scraped_at": "2026-04-26T04:57:16.553949+00:00",
+  "companies": [
+    {
+      "company": "Whoops!",
+      "slug": "water2buy",
+      "overall_rating": "",
+      "review_count": 0,
+      "reviews": []
+    },
+    {
+      "company": "Whoops!",
+      "slug": "harvey-water-softeners",
+      "overall_rating": "",
+      "review_count": 0,
+      "reviews": []
+    }
+  ],
+  "reviews": [
+    {
+      "company": "Whoops!",
+      "slug": "water2buy",
+      "overall_rating": "",
+      "review_count": 0,
+      "reviews": []
+    },
+    {
+      "company": "Whoops!",
+      "slug": "harvey-water-softeners",
+      "overall_rating": "",
+      "review_count": 0,
+      "reviews": []
+    }
+  ]
+}
