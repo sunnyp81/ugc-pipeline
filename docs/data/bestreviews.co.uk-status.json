@@ -128,7 +128,23 @@
           "error": null
         }
       }
+    },
+    {
+      "timestamp": "2026-06-14T06:32:48Z",
+      "categories": {
+        "water-softeners": {
+          "sources": {
+            "reddit": 0,
+            "youtube": 0,
+            "forums": 0,
+            "trustpilot": 2,
+            "amazon": 0
+          },
+          "products_found": 0,
+          "error": null
+        }
+      }
     }
   ],
-  "last_run": "2026-06-07T06:20:22Z"
+  "last_run": "2026-06-14T06:32:48Z"
 }
